@@ -1,0 +1,56 @@
+# Image Version 0.7
+# Base image
+FROM oraclelinux:9
+
+# Information
+LABEL maintainer="Nicolae Codleanu <nicolae.codleanu@cerner.com>"
+
+# Trying to find a way to start the container with systemctl also up and running
+# COPY start.sh start.sh
+# CMD ["/bin/bash", "start.sh"]
+CMD ["COPY", "start.sh start.sh"]
+CMD ["/sbin/init", "start.sh"]
+
+# Run available updates 
+# CMD [“echo”,”Get available updates”] 
+RUN yum update
+RUN yum upgrade 
+# CMD [“echo”,”Updates processed”] 
+
+# To build, run and connect to the container with something like: 
+# docker build –t orel9jk:0.5 .
+#   --> must include the . at the end which specifies the directory(in this case current dir)
+#       where the Dockerfile is located.
+# docker exec -it <container id> sh
+# Run the container from this image using a command like this: 
+# docker run -it -d --privileged=true image_id /sbin/init -p 8080:80
+# docker run -i -t -d orel9jk:0.2
+
+# Install Jenkins Section
+
+# First install pre-requisites - Java
+# CMD [“echo”,”Jenkins Section - Installing pre-requisites”] 
+RUN yum install -q -y java-11-openjdk
+
+# Retrieving jenkins repo
+# CMD [“echo”,”Jenkins Section - Installing wget”] 
+RUN yum install  -q -y wget
+#CMD [“echo”,”Jenkins Section - Retrieving jenkins repo”] 
+RUN wget -O /etc/yum.repos.d/jenkins.repo \
+    https://pkg.jenkins.io/redhat/jenkins.repo
+# CMD [“echo”,”Jenkins Section - Importing jenkins repo key”]     
+RUN rpm --import https://pkg.jenkins.io/redhat/jenkins.io.key
+# CMD [“echo”,”Jenkins Section - Completed instalation of pre-requisites”] 
+
+# Install Jenkins
+# CMD [“echo”,”Jenkins Section - Installing Jenkins”] 
+RUN yum install  -q -y jenkins 
+# CMD [“echo”,”Jenkins Section - Completed instalation of Jenkins”] 
+
+# Starting Jenkins - this part doesn't work yet
+#CMD [“echo”,”Jenkins Section - Starting Jenkins”]
+#RUN systemctl daemon-reload 
+#RUN systemctl enable jenkins
+#RUN systemctl start jenkins
+#CMD [“echo”,”Jenkins Section - Jenkins Running”] 
+
